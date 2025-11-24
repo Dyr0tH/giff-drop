@@ -5,6 +5,7 @@ from urllib.parse import urlparse
 import pathlib
 import yt_dlp
 import imageio_ffmpeg
+import mimetypes
 
 def get_downloads_folder():
     return str(pathlib.Path.home() / "Downloads")
@@ -92,26 +93,40 @@ def download_media(url, output_folder=None):
 
         media_response = requests.get(media_url, headers=headers, stream=True)
         media_response.raise_for_status()
-        
         content_type = media_response.headers.get('content-type', '')
         
-        if 'image' not in content_type and 'video' not in content_type and not is_tenor_url(url):
-             pass
-
+        # Extract filename
         parsed_url = urlparse(media_url)
         filename = os.path.basename(parsed_url.path)
         
-        if not os.path.splitext(filename)[1]:
-            if 'image/jpeg' in content_type:
-                filename += '.jpg'
-            elif 'image/png' in content_type:
-                filename += '.png'
-            elif 'image/gif' in content_type:
-                filename += '.gif'
-            elif 'image/webp' in content_type:
-                filename += '.webp'
+        # If filename is empty (e.g. root URL), use a default
+        if not filename:
+            filename = "download"
+
+        # Check if we need to add an extension
+        root, ext = os.path.splitext(filename)
+        if not ext:
+            # Try to guess from Content-Type
+            mime_type = content_type.split(';')[0].strip()
+            guessed_ext = mimetypes.guess_extension(mime_type)
+            
+            if guessed_ext:
+                # mimetypes often returns .jpe for jpeg, let's normalize if we want, but .jpe is valid.
+                # .jpg is preferred usually.
+                if guessed_ext == '.jpe': guessed_ext = '.jpg'
+                filename += guessed_ext
             else:
-                filename += '.download'
+                # Manual fallback for common types if mimetypes fails or returns None
+                if 'image/jpeg' in mime_type:
+                    filename += '.jpg'
+                elif 'image/png' in mime_type:
+                    filename += '.png'
+                elif 'image/gif' in mime_type:
+                    filename += '.gif'
+                elif 'image/webp' in mime_type:
+                    filename += '.webp'
+                else:
+                    filename += '.download'
 
         target_folder = output_folder if output_folder else get_downloads_folder()
         save_path = os.path.join(target_folder, filename)
