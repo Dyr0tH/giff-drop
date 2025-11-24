@@ -50,13 +50,16 @@ def download_youtube(url, audio_only=False, resolution=None, output_folder=None)
                 }],
             })
         else:
+
             if resolution:
                 ydl_opts.update({
                     'format': f'bestvideo[height={resolution}]+bestaudio/best[height={resolution}]/best',
+                    'merge_output_format': 'mp4',
                 })
             else:
                 ydl_opts.update({
                     'format': 'bestvideo+bestaudio/best',
+                    'merge_output_format': 'mp4',
                 })
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
