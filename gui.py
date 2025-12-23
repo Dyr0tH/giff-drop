@@ -3,10 +3,21 @@ from PyQt6.QtWidgets import (QMainWindow, QLabel, QVBoxLayout, QWidget, QMessage
                              QHBoxLayout, QProgressBar, QComboBox, QFileDialog, QTabWidget,
                              QScrollArea, QGridLayout)
 from PyQt6.QtCore import Qt, QThread, pyqtSignal, QSize
-from PyQt6.QtGui import QDragEnterEvent, QDropEvent, QPixmap
+from PyQt6.QtGui import QDragEnterEvent, QDropEvent, QPixmap, QIcon
 import downloader
 import os
 import requests
+import sys
+
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
 
 class ResolutionFetcher(QThread):
     finished = pyqtSignal(list)
@@ -90,6 +101,7 @@ class YouTubeDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Download YouTube Video")
+        self.setWindowIcon(QIcon(resource_path("logo.ico")))
         self.setFixedWidth(400)
         
         layout = QVBoxLayout(self)
@@ -193,6 +205,7 @@ class InstagramDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Download Instagram Video")
+        self.setWindowIcon(QIcon(resource_path("logo.ico")))
         self.setFixedWidth(400)
         
         layout = QVBoxLayout(self)
@@ -233,6 +246,7 @@ class PinterestDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Download Pinterest Media")
+        self.setWindowIcon(QIcon(resource_path("logo.ico")))
         self.setFixedWidth(400)
         
         layout = QVBoxLayout(self)
@@ -454,6 +468,7 @@ class DropWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("GIF Drop")
+        self.setWindowIcon(QIcon(resource_path("logo.ico")))
         self.setGeometry(100, 100, 550, 600) # Increased size for Tabs
         
         self.download_folder = None 
